@@ -50,24 +50,36 @@ class _HomePageState extends State<HomePage> {
     _teamAmount = 2;
   }
 
-  void _onTapDown(TapDownDetails details) {
-    Offset tapPosition = details.localPosition;
-    double minDistance = double.maxFinite;
+  Offset _getFinalPositionOrNull(Offset position) {
+    double minDistance = 2.1 * _circleRadius;
     for (PersonData person in _persons) {
-      Offset difference = person.position - tapPosition;
+      Offset difference = position - person.position;
       double distance = difference.distance;
       if (distance < minDistance) {
-        minDistance = distance;
+        if (distance == 0) {
+          return null;
+        }
+        Offset normalizedDirection = difference / distance;
+        position = person.position + normalizedDirection * minDistance;
       }
     }
+    for (PersonData person in _persons) {
+      if ((person.position - position).distance < minDistance) {
+        return null;
+      }
+    }
+    return position;
+  }
 
-    if (minDistance <= _circleRadius * 2) {
+  void _onTapDown(TapDownDetails details) {
+    Offset newPosition = _getFinalPositionOrNull(details.localPosition);
+    if (newPosition == null) {
       return;
     }
 
     setState(() {
-      _persons.add(PersonData(details.localPosition, _nextIdentifier.toString(),
-          Colors.blue, GlobalKey()));
+      _persons.add(PersonData(
+          newPosition, _nextIdentifier.toString(), Colors.blue, GlobalKey()));
       _nextIdentifier++;
     });
   }
