@@ -1,4 +1,4 @@
-package com.example.quickteam
+package com.jlucke.quickteam
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
