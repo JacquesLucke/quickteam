@@ -111,12 +111,12 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Center(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               RaisedButton(
                 child: Text('Divide'),
                 onPressed: _makeTeams,
               ),
+              Spacer(),
               IconButton(
                 icon: Icon(Icons.add),
                 onPressed: () {
@@ -134,6 +134,7 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               ),
+              Spacer(),
               RaisedButton(
                 child: Text('Reset'),
                 onPressed: _reset,
