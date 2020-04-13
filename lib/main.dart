@@ -35,8 +35,8 @@ class _HomePageState extends State<HomePage> {
 
   void _onTapDown(TapDownDetails details) {
     setState(() {
-      _persons.add(PersonData(
-          details.localPosition, _nextIdentifier.toString(), Colors.blue));
+      _persons.add(PersonData(details.localPosition, _nextIdentifier.toString(),
+          Colors.blue, GlobalKey()));
       _nextIdentifier++;
     });
   }
@@ -69,6 +69,7 @@ class _HomePageState extends State<HomePage> {
     List<Widget> widgets = [];
     for (PersonData person in _persons) {
       widgets.add(Positioned(
+        key: person.key,
         child: FloatingActionButton(
           child: Text(
             person.identifier,
@@ -128,6 +129,7 @@ class PersonData {
   Offset position;
   String identifier;
   Color color;
+  Key key;
 
-  PersonData(this.position, this.identifier, this.color);
+  PersonData(this.position, this.identifier, this.color, this.key);
 }
