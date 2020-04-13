@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -22,18 +23,48 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+double computeCircleRadius(BuildContext context) {
+  Size size = MediaQuery.of(context).size;
+  return min(size.width, size.height) / 12;
+}
+
+List<Color> teamColors = [
+  Colors.blueGrey,
+  Colors.redAccent,
+  Colors.lightGreen,
+  Colors.purpleAccent,
+  Colors.amber,
+];
+
 class _HomePageState extends State<HomePage> {
   List<PersonData> _persons;
   int _nextIdentifier;
+  double _circleRadius = 10;
+  int _teamAmount;
 
   @override
   void initState() {
     super.initState();
     _persons = [];
     _nextIdentifier = 1;
+    _teamAmount = 2;
   }
 
   void _onTapDown(TapDownDetails details) {
+    Offset tapPosition = details.localPosition;
+    double minDistance = double.maxFinite;
+    for (PersonData person in _persons) {
+      Offset difference = person.position - tapPosition;
+      double distance = difference.distance;
+      if (distance < minDistance) {
+        minDistance = distance;
+      }
+    }
+
+    if (minDistance <= _circleRadius * 2) {
+      return;
+    }
+
     setState(() {
       _persons.add(PersonData(details.localPosition, _nextIdentifier.toString(),
           Colors.blue, GlobalKey()));
@@ -46,14 +77,11 @@ class _HomePageState extends State<HomePage> {
       var rng = Random();
       List<PersonData> personsCopy = List<PersonData>.from(_persons);
       personsCopy.shuffle(rng);
-      int firstTeamSize = _persons.length ~/ 2;
 
-      for (PersonData person in personsCopy.sublist(0, firstTeamSize)) {
-        person.color = Colors.blueGrey;
-      }
-      for (PersonData person in personsCopy.sublist(firstTeamSize)) {
-        person.color = Colors.redAccent;
-      }
+      personsCopy.asMap().forEach((index, person) {
+        Color color = teamColors[index % _teamAmount];
+        person.color = color;
+      });
     });
   }
 
@@ -66,27 +94,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> widgets = [];
-    for (PersonData person in _persons) {
-      widgets.add(Positioned(
-        key: person.key,
-        child: FloatingActionButton(
-          child: Text(
-            person.identifier,
-            textScaleFactor: 1.5,
-          ),
-          onPressed: () {
-            setState(() {
-              _persons.remove(person);
-            });
-          },
-          backgroundColor: person.color,
-        ),
-        left: person.position.dx,
-        top: person.position.dy,
-      ));
-    }
-
+    _circleRadius = computeCircleRadius(context);
     return Scaffold(
       appBar: AppBar(
         title: Center(
@@ -94,8 +102,25 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               RaisedButton(
-                child: Text('Make Teams'),
+                child: Text('Divide'),
                 onPressed: _makeTeams,
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  setState(() {
+                    _teamAmount = min(_teamAmount + 1, teamColors.length);
+                  });
+                },
+              ),
+              Text(_teamAmount.toString() + " Teams"),
+              IconButton(
+                icon: Icon(Icons.remove),
+                onPressed: () {
+                  setState(() {
+                    _teamAmount = max(_teamAmount - 1, 2);
+                  });
+                },
               ),
               RaisedButton(
                 child: Text('Reset'),
@@ -112,9 +137,9 @@ class _HomePageState extends State<HomePage> {
               onTapDown: _onTapDown,
               child: Container(
                 constraints: BoxConstraints.expand(),
-                color: Colors.green,
-                child: Stack(
-                  children: widgets,
+                color: Colors.lightBlueAccent,
+                child: CustomPaint(
+                  foregroundPainter: QuickTeamPainter(_persons, _circleRadius),
                 ),
               ),
             ),
@@ -132,4 +157,45 @@ class PersonData {
   Key key;
 
   PersonData(this.position, this.identifier, this.color, this.key);
+}
+
+class QuickTeamPainter extends CustomPainter {
+  List<PersonData> _persons;
+  double _circleRadius;
+
+  QuickTeamPainter(this._persons, this._circleRadius);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    paint.style = PaintingStyle.fill;
+
+    for (PersonData person in _persons) {
+      paint.color = person.color;
+      canvas.drawCircle(
+          person.position + Offset(_circleRadius / 10, _circleRadius / 10),
+          _circleRadius,
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = Colors.black12);
+      canvas.drawCircle(person.position, _circleRadius, paint);
+
+      final textPainter = TextPainter(
+          text: TextSpan(
+              text: person.identifier,
+              style: TextStyle(
+                  color: Colors.white, fontSize: _circleRadius * 0.75)),
+          textDirection: TextDirection.ltr);
+      textPainter.layout(minWidth: 0, maxWidth: _circleRadius * 2);
+      textPainter.paint(
+          canvas,
+          person.position -
+              Offset(textPainter.width / 2, textPainter.height / 2));
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
 }
