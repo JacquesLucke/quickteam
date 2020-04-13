@@ -44,9 +44,15 @@ class _HomePageState extends State<HomePage> {
   void _makeTeams() {
     setState(() {
       var rng = Random();
-      for (PersonData person in _persons) {
-        person.color = Color.fromARGB(
-            255, rng.nextInt(255), rng.nextInt(255), rng.nextInt(255));
+      List<PersonData> personsCopy = List<PersonData>.from(_persons);
+      personsCopy.shuffle(rng);
+      int firstTeamSize = _persons.length ~/ 2;
+
+      for (PersonData person in personsCopy.sublist(0, firstTeamSize)) {
+        person.color = Colors.blueGrey;
+      }
+      for (PersonData person in personsCopy.sublist(firstTeamSize)) {
+        person.color = Colors.redAccent;
       }
     });
   }
@@ -64,7 +70,10 @@ class _HomePageState extends State<HomePage> {
     for (PersonData person in _persons) {
       widgets.add(Positioned(
         child: FloatingActionButton(
-          child: Text(person.identifier),
+          child: Text(
+            person.identifier,
+            textScaleFactor: 1.5,
+          ),
           onPressed: () {
             setState(() {
               _persons.remove(person);
@@ -81,6 +90,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Center(
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               RaisedButton(
                 child: Text('Make Teams'),
@@ -101,7 +111,7 @@ class _HomePageState extends State<HomePage> {
               onTapDown: _onTapDown,
               child: Container(
                 constraints: BoxConstraints.expand(),
-                color: Colors.red,
+                color: Colors.green,
                 child: Stack(
                   children: widgets,
                 ),
