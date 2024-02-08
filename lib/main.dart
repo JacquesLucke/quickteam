@@ -37,10 +37,10 @@ List<Color> teamColors = [
 ];
 
 class _HomePageState extends State<HomePage> {
-  List<PersonData> _persons;
-  int _nextIdentifier;
+  List<PersonData>? _persons;
+  int? _nextIdentifier;
   double _circleRadius = 10;
-  int _teamAmount;
+  int? _teamAmount;
 
   @override
   void initState() {
@@ -50,9 +50,9 @@ class _HomePageState extends State<HomePage> {
     _teamAmount = 2;
   }
 
-  Offset _getFinalPositionOrNull(Offset position) {
+  Offset? _getFinalPositionOrNull(Offset position) {
     double minDistance = 2.1 * _circleRadius;
-    for (PersonData person in _persons) {
+    for (PersonData person in _persons!) {
       Offset difference = position - person.position;
       double distance = difference.distance;
       if (distance < minDistance) {
@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
         position = person.position + normalizedDirection * minDistance;
       }
     }
-    for (PersonData person in _persons) {
+    for (PersonData person in _persons!) {
       if ((person.position - position).distance < minDistance) {
         return null;
       }
@@ -72,26 +72,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onTapDown(TapDownDetails details) {
-    Offset newPosition = _getFinalPositionOrNull(details.localPosition);
+    Offset? newPosition = _getFinalPositionOrNull(details.localPosition);
     if (newPosition == null) {
       return;
     }
 
     setState(() {
-      _persons.add(PersonData(
+      _persons!.add(PersonData(
           newPosition, _nextIdentifier.toString(), Colors.blue, GlobalKey()));
-      _nextIdentifier++;
+      _nextIdentifier = _nextIdentifier! + 1;
     });
   }
 
   void _makeTeams() {
     setState(() {
       var rng = Random();
-      List<PersonData> personsCopy = List<PersonData>.from(_persons);
+      List<PersonData> personsCopy = List<PersonData>.from(_persons!);
       personsCopy.shuffle(rng);
 
       personsCopy.asMap().forEach((index, person) {
-        Color color = teamColors[index % _teamAmount];
+        Color color = teamColors[index % _teamAmount!];
         person.color = color;
       });
     });
@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
 
   void _reset() {
     setState(() {
-      _persons.clear();
+      _persons!.clear();
       _nextIdentifier = 1;
     });
   }
@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> {
         title: Center(
           child: Row(
             children: [
-              RaisedButton(
+              ElevatedButton(
                 child: Text('Divide'),
                 onPressed: _makeTeams,
               ),
@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                 icon: Icon(Icons.add),
                 onPressed: () {
                   setState(() {
-                    _teamAmount = min(_teamAmount + 1, teamColors.length);
+                    _teamAmount = min(_teamAmount! + 1, teamColors.length);
                   });
                 },
               ),
@@ -130,12 +130,12 @@ class _HomePageState extends State<HomePage> {
                 icon: Icon(Icons.remove),
                 onPressed: () {
                   setState(() {
-                    _teamAmount = max(_teamAmount - 1, 2);
+                    _teamAmount = max(_teamAmount! - 1, 2);
                   });
                 },
               ),
               Spacer(),
-              RaisedButton(
+              ElevatedButton(
                 child: Text('Reset'),
                 onPressed: _reset,
               )
@@ -152,7 +152,7 @@ class _HomePageState extends State<HomePage> {
                 constraints: BoxConstraints.expand(),
                 color: Colors.lightBlueAccent,
                 child: CustomPaint(
-                  foregroundPainter: QuickTeamPainter(_persons, _circleRadius),
+                  foregroundPainter: QuickTeamPainter(_persons!, _circleRadius),
                 ),
               ),
             ),
