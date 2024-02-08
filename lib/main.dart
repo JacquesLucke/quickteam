@@ -1,11 +1,12 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(QuickTeamApp());
+void main() => runApp(const QuickTeamApp());
 
 class QuickTeamApp extends StatelessWidget {
+  const QuickTeamApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,6 +20,8 @@ class QuickTeamApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -113,31 +116,31 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             children: [
               ElevatedButton(
-                child: Text('Divide'),
                 onPressed: _makeTeams,
+                child: const Text('Divide'),
               ),
-              Spacer(),
+              const Spacer(),
               IconButton(
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
                 onPressed: () {
                   setState(() {
                     _teamAmount = min(_teamAmount! + 1, teamColors.length);
                   });
                 },
               ),
-              Text(_teamAmount.toString() + " Teams"),
+              Text("$_teamAmount Teams"),
               IconButton(
-                icon: Icon(Icons.remove),
+                icon: const Icon(Icons.remove),
                 onPressed: () {
                   setState(() {
                     _teamAmount = max(_teamAmount! - 1, 2);
                   });
                 },
               ),
-              Spacer(),
+              const Spacer(),
               ElevatedButton(
-                child: Text('Reset'),
                 onPressed: _reset,
+                child: const Text('Reset'),
               )
             ],
           ),
@@ -149,7 +152,7 @@ class _HomePageState extends State<HomePage> {
             child: GestureDetector(
               onTapDown: _onTapDown,
               child: Container(
-                constraints: BoxConstraints.expand(),
+                constraints: const BoxConstraints.expand(),
                 color: Colors.lightBlueAccent,
                 child: CustomPaint(
                   foregroundPainter: QuickTeamPainter(_persons!, _circleRadius),
@@ -173,8 +176,8 @@ class PersonData {
 }
 
 class QuickTeamPainter extends CustomPainter {
-  List<PersonData> _persons;
-  double _circleRadius;
+  final List<PersonData> _persons;
+  final double _circleRadius;
 
   QuickTeamPainter(this._persons, this._circleRadius);
 
